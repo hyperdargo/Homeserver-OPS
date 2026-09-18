@@ -335,13 +335,13 @@ function renderOverview(overview, hermes, errors) {
       const el = document.createElement('div');
       el.className = 'quick-item';
       el.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 2px; max-width: 80%;">
-          <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span class="badge ${err.priority <= 2 ? 'badge-danger' : 'badge-warning'}">${err.priority_name}</span>
             <span style="font-weight: 600; color: #fff;">${escapeHtml(err.unit)}</span>
             <span class="text-muted" style="font-size: 10px;">${escapeHtml(err.timestamp)}</span>
           </div>
-          <div class="text-muted" style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          <div class="text-muted" style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;">
             ${escapeHtml(err.message)}
           </div>
         </div>
@@ -412,7 +412,7 @@ function filterDockerTable() {
     tr.innerHTML = `
       <td>
         <div style="font-weight: 700; color: #ffffff;">${escapeHtml(c.name)}</div>
-        <div class="text-muted" style="font-size: 10px;">${escapeHtml(c.image)}</div>
+        <div class="text-muted col-secondary" style="font-size: 10px;">${escapeHtml(c.image)}</div>
       </td>
       <td>
         <span class="${badgeClass}">${escapeHtml(c.status || c.state)}</span>
@@ -423,11 +423,11 @@ function filterDockerTable() {
           <div class="progress-bar-fill ${getProgressColorClass(c.mem_percent)}" style="width: ${c.mem_percent}%;"></div>
         </div>
       </td>
-      <td style="font-weight: 600;">${c.mem_percent_str}</td>
+      <td class="col-secondary" style="font-weight: 600;">${c.mem_percent_str}</td>
       <td style="font-weight: 600;">${c.cpu_percent_str}</td>
-      <td class="text-muted">${escapeHtml(c.net_io)}</td>
-      <td class="text-muted">${escapeHtml(c.block_io)}</td>
-      <td class="text-muted" style="font-size: 11px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(c.ports)}">
+      <td class="text-muted col-secondary">${escapeHtml(c.net_io)}</td>
+      <td class="text-muted col-secondary">${escapeHtml(c.block_io)}</td>
+      <td class="text-muted col-secondary" style="font-size: 11px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(c.ports)}">
         ${escapeHtml(c.ports || '-')}
       </td>
       <td>
@@ -515,11 +515,11 @@ function renderHermes(hermes, servicesData) {
     procs.forEach(p => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="font-weight: 700;">${p.pid}</td>
+        <td class="col-secondary" style="font-weight: 700;">${p.pid}</td>
         <td>${escapeHtml(p.name)}</td>
         <td style="font-weight: 600;">${p.memory_mb} MB</td>
         <td>${p.cpu_percent}%</td>
-        <td class="text-muted" style="font-size: 11px;">${escapeHtml(p.cmd)}</td>
+        <td class="text-muted col-secondary" style="font-size: 11px;">${escapeHtml(p.cmd)}</td>
       `;
       procsTbody.appendChild(tr);
     });
@@ -537,11 +537,11 @@ function renderHermes(hermes, servicesData) {
       const isOnline = app.status === 'online';
       tr.innerHTML = `
         <td style="font-weight: 700; color: #fff;">${escapeHtml(app.name)}</td>
-        <td>${app.pid}</td>
+        <td class="col-secondary">${app.pid}</td>
         <td><span class="badge ${isOnline ? 'badge-success' : 'badge-danger'}">${app.status.toUpperCase()}</span></td>
         <td>${app.memory_mb} MB</td>
-        <td>${app.cpu}%</td>
-        <td>${app.restarts}</td>
+        <td class="col-secondary">${app.cpu}%</td>
+        <td class="col-secondary">${app.restarts}</td>
       `;
       pm2Tbody.appendChild(tr);
     });
@@ -559,7 +559,7 @@ function renderHermes(hermes, servicesData) {
       tr.innerHTML = `
         <td style="font-weight: 600; color: #fff;">${escapeHtml(s.unit)}</td>
         <td><span class="badge ${s.active ? 'badge-success' : 'badge-danger'}">${s.status.toUpperCase()}</span></td>
-        <td class="text-muted" style="font-size: 11px;">${escapeHtml(s.description)}</td>
+        <td class="text-muted col-secondary" style="font-size: 11px;">${escapeHtml(s.description)}</td>
       `;
       sysTbody.appendChild(tr);
     });
@@ -589,8 +589,8 @@ function filterPortsTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="font-weight: 600; color: #ffffff;">${escapeHtml(p.service || 'System Service')}</td>
-      <td>${(p.protocol || 'TCP').toUpperCase()}</td>
-      <td class="text-muted">${escapeHtml(p.scope || 'Internal Network')}</td>
+      <td class="col-secondary">${(p.protocol || 'TCP').toUpperCase()}</td>
+      <td class="text-muted col-secondary">${escapeHtml(p.scope || 'Internal Network')}</td>
       <td>
         <span class="badge badge-success">PROTECTED &bull; ACTIVE</span>
       </td>
@@ -673,9 +673,9 @@ function renderStorage(storageData, topProcsData) {
   topRam.forEach(p => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td style="font-weight: 700;">${p.pid}</td>
+      <td class="col-secondary" style="font-weight: 700;">${p.pid}</td>
       <td style="font-weight: 600; color: #fff;">${escapeHtml(p.name)}</td>
-      <td class="text-muted">${escapeHtml(p.user)}</td>
+      <td class="text-muted col-secondary">${escapeHtml(p.user)}</td>
       <td style="font-weight: 600;">${p.memory_mb} MB</td>
       <td>${p.memory_percent}%</td>
     `;
@@ -689,9 +689,9 @@ function renderStorage(storageData, topProcsData) {
   topCpu.forEach(p => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td style="font-weight: 700;">${p.pid}</td>
+      <td class="col-secondary" style="font-weight: 700;">${p.pid}</td>
       <td style="font-weight: 600; color: #fff;">${escapeHtml(p.name)}</td>
-      <td class="text-muted">${escapeHtml(p.user)}</td>
+      <td class="text-muted col-secondary">${escapeHtml(p.user)}</td>
       <td style="font-weight: 600; color: #fff;">${p.cpu_percent}%</td>
       <td>${p.memory_mb} MB</td>
     `;
@@ -765,12 +765,12 @@ function filterErrorsTable() {
   filtered.forEach(err => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="text-muted" style="font-size: 11px;">${escapeHtml(err.timestamp)}</td>
+      <td class="text-muted col-secondary" style="font-size: 11px;">${escapeHtml(err.timestamp)}</td>
       <td>
         <span class="badge ${err.priority <= 2 ? 'badge-danger' : 'badge-warning'}">${err.priority_name}</span>
       </td>
       <td style="font-weight: 600; color: #fff;">${escapeHtml(err.unit)}</td>
-      <td style="font-size: 11px; line-height: 1.4;">${escapeHtml(err.message)}</td>
+      <td style="font-size: 11px; line-height: 1.4; word-break: break-word; overflow-wrap: anywhere;">${escapeHtml(err.message)}</td>
     `;
     tbody.appendChild(tr);
   });

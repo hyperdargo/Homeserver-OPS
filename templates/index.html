@@ -244,12 +244,12 @@
               <tr>
                 <th>Container</th>
                 <th>Status</th>
-                <th>Memory Usage &amp; Limit</th>
-                <th>Memory %</th>
+                <th>Memory</th>
+                <th class="col-secondary">RAM %</th>
                 <th>CPU %</th>
-                <th>Network I/O</th>
-                <th>Block I/O</th>
-                <th>Ports</th>
+                <th class="col-secondary">Network I/O</th>
+                <th class="col-secondary">Block I/O</th>
+                <th class="col-secondary">Ports</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -284,11 +284,11 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>PID</th>
+                <th class="col-secondary">PID</th>
                 <th>Process Name</th>
-                <th>Memory (RSS)</th>
+                <th>Memory</th>
                 <th>CPU %</th>
-                <th>Command Line</th>
+                <th class="col-secondary">Command Line</th>
               </tr>
             </thead>
             <tbody id="hermes-procs-tbody">
@@ -314,11 +314,11 @@
               <thead>
                 <tr>
                   <th>App Name</th>
-                  <th>PID</th>
+                  <th class="col-secondary">PID</th>
                   <th>Status</th>
                   <th>Memory</th>
-                  <th>CPU</th>
-                  <th>Restarts</th>
+                  <th class="col-secondary">CPU</th>
+                  <th class="col-secondary">Restarts</th>
                 </tr>
               </thead>
               <tbody id="pm2-tbody">
@@ -338,7 +338,7 @@
                 <tr>
                   <th>Service</th>
                   <th>Status</th>
-                  <th>Description</th>
+                  <th class="col-secondary">Description</th>
                 </tr>
               </thead>
               <tbody id="systemd-tbody">
@@ -360,8 +360,8 @@
             <thead>
               <tr>
                 <th>Service / Component</th>
-                <th>Protocol</th>
-                <th>Access Scope</th>
+                <th class="col-secondary">Protocol</th>
+                <th class="col-secondary">Access Scope</th>
                 <th>Security &amp; Status</th>
               </tr>
             </thead>
@@ -407,9 +407,9 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>PID</th>
+                  <th class="col-secondary">PID</th>
                   <th>Name</th>
-                  <th>User</th>
+                  <th class="col-secondary">User</th>
                   <th>Memory</th>
                   <th>RAM %</th>
                 </tr>
@@ -429,9 +429,9 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>PID</th>
+                  <th class="col-secondary">PID</th>
                   <th>Name</th>
-                  <th>User</th>
+                  <th class="col-secondary">User</th>
                   <th>CPU %</th>
                   <th>Memory</th>
                 </tr>
@@ -473,9 +473,9 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th style="width: 170px;">Timestamp</th>
-                <th style="width: 110px;">Severity</th>
-                <th style="width: 220px;">Unit / Source</th>
+                <th class="col-secondary">Timestamp</th>
+                <th>Severity</th>
+                <th>Unit / Source</th>
                 <th>Message</th>
               </tr>
             </thead>
