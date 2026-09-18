@@ -713,7 +713,6 @@ def get_system_uptime():
 
 # Background Cache Updater
 def refresh_cache():
-    global _CACHE
     while True:
         try:
             cpu = get_cpu_info()
