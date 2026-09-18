@@ -93,6 +93,11 @@ Most homelab monitoring dashboards fall into one of two traps:
 - Active monitoring of system daemons, Docker proxies, and PM2 application managers.
 - Privacy-first display: classifies scope (Loopback vs. Network) without exposing vulnerable port numbers.
 
+### 📱 6. Mobile-First & Progressive Web App (PWA)
+- **Installable PWA:** Add directly to home screen on iOS, Android, and Desktop with standalone window experience and custom 192/512/maskable icons.
+- **Offline Shell Caching:** Service Worker (`sw.js`) pre-caches HTML, CSS, JS, and branding assets for instant loading.
+- **Phone Optimized:** Touch-friendly tap targets (≥44px), horizontal swipeable navigation tabs, iOS viewport zoom prevention (16px inputs), and safe-area inset support.
+
 ---
 
 ## 🚀 Quickstart

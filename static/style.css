@@ -1191,26 +1191,255 @@ body {
   color: #71717a;
 }
 
-/* Responsive */
+/* ==============================================================================
+   Mobile & PWA Responsive System
+   ============================================================================== */
+
 @media (max-width: 1200px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
+  /* Safe area support for iOS / PWA standalone mode */
+  body {
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
+
+  /* Header compact mobile layout */
+  .header {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .header-left {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   .header-pills {
     width: 100%;
     overflow-x: auto;
-    padding-bottom: 4px;
+    white-space: nowrap;
+    display: flex;
+    gap: 8px;
+    padding: 4px 0 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
+
+  .header-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .telemetry-pill {
+    flex-shrink: 0;
+    padding: 4px 10px;
+  }
+
+  .header-actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .refresh-selector select {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  #btn-refresh, #btn-install-pwa {
+    min-height: 40px;
+    padding: 8px 14px;
+  }
+
+  /* Navigation Tabs: smooth horizontal swipeable bar */
+  .nav-tabs {
+    padding: 0 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 4px;
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-tab {
+    padding: 12px 14px;
+    font-size: 12px;
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+
+  /* Main content container */
+  .main-content {
+    padding: 14px 10px;
+  }
+
+  /* Grids collapse to single column */
   .grid-4, .grid-3, .grid-2 {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
+
+  .card {
+    padding: 14px;
+    border-radius: 8px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
   .input-search {
+    width: 100%;
     min-width: 100%;
+    font-size: 14px;
+  }
+
+  /* Tables: smooth horizontal scroll with visible touch feedback */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .data-table {
+    min-width: 600px;
+  }
+
+  .data-table th, .data-table td {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  /* Hermes AI Console on mobile */
+  .hermes-chat-card {
+    height: calc(100dvh - 180px);
+    min-height: 480px;
+    max-height: none;
+    border-radius: 8px;
+  }
+
+  .hermes-console-header {
+    padding: 10px 12px;
+  }
+
+  .hermes-title {
+    font-size: 13px;
+  }
+
+  .hermes-subtitle {
+    font-size: 10px;
+  }
+
+  .hermes-context-bar {
+    padding: 6px 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 10px;
+  }
+
+  .hermes-context-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chat-actions {
+    padding: 6px 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
+  }
+
+  .chat-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chat-action-chip {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    font-size: 11px;
+    min-height: 32px;
+  }
+
+  .hermes-chat-body {
+    padding: 12px 10px;
+  }
+
+  .chat-bubble {
+    max-width: 92%;
+    font-size: 13.5px;
+    padding: 10px 12px;
+  }
+
+  .hermes-chat-footer {
+    padding: 10px;
+  }
+
+  /* Crucial iOS Safari fix: font-size >= 16px prevents viewport auto-zoom */
+  .hermes-textarea {
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+
+  .hermes-send-button {
+    padding: 0 16px;
+    min-height: 44px;
+  }
+
+  .hermes-input-hints {
+    font-size: 10px;
+  }
+
+  /* Container Log Modal mobile adaptation */
+  .modal-dialog {
+    width: 95vw;
+    max-width: 95vw;
+    height: 90vh;
+    max-height: 90vh;
+    border-radius: 8px;
+    margin: 10px auto;
+  }
+
+  .modal-header {
+    padding: 12px 14px;
+  }
+
+  .modal-toolbar {
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .modal-body {
+    padding: 10px;
+  }
+
+  .log-terminal-modal {
+    font-size: 11px;
+  }
+
+  /* Footer on mobile */
+  .footer {
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    text-align: center;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
   }
 }

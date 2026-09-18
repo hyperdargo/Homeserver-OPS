@@ -2,9 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
   <title>HOMESERVER OPS - Mission Control</title>
+  
+  <!-- PWA & Mobile Capabilities -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ServerOps" />
+  <link rel="apple-touch-icon" href="/static/icon-192.png" />
   <link rel="icon" type="image/png" href="/static/favicon.png" />
+  
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -51,8 +61,11 @@
       </div>
     </div>
 
-    <!-- Controls: Auto-refresh & Manual trigger -->
+    <!-- Controls: Auto-refresh, PWA Install & Manual trigger -->
     <div class="header-actions">
+      <button id="btn-install-pwa" class="btn btn-secondary btn-sm" style="display:none;" title="Install Homeserver Ops as App">
+        &#11123; Install App
+      </button>
       <div class="refresh-selector">
         <label for="refresh-interval" class="sr-only">Auto Refresh</label>
         <select id="refresh-interval" title="Polling Interval">

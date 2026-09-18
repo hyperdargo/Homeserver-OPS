@@ -1112,6 +1112,63 @@ function initHermesChat() {
   }
 }
 
+// 10. Progressive Web App (PWA) Support
+let deferredInstallPrompt = null;
+
+function initPWA() {
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .then((reg) => {
+          console.log('[PWA] ServiceWorker registered successfully with scope:', reg.scope);
+        })
+        .catch((err) => {
+          console.warn('[PWA] ServiceWorker registration failed:', err);
+        });
+    });
+  }
+
+  // Handle BeforeInstallPrompt event for custom installation trigger
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    const installBtn = document.getElementById('btn-install-pwa');
+    if (installBtn) {
+      installBtn.style.display = 'inline-flex';
+      installBtn.onclick = async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const { outcome } = await deferredInstallPrompt.userChoice;
+          console.log('[PWA] User install choice:', outcome);
+          if (outcome === 'accepted') {
+            installBtn.style.display = 'none';
+          }
+          deferredInstallPrompt = null;
+        }
+      };
+    }
+  });
+
+  // Handle App Installed event
+  window.addEventListener('appinstalled', () => {
+    const installBtn = document.getElementById('btn-install-pwa');
+    if (installBtn) installBtn.style.display = 'none';
+    console.log('[PWA] Homeserver Ops PWA was installed successfully!');
+  });
+
+  // Support browser back/forward buttons for tab history
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      const tabId = hash.startsWith('tab-') ? hash.replace('tab-', '') : hash;
+      if (document.getElementById(`tab-${tabId}`)) {
+        switchTab(tabId);
+      }
+    }
+  });
+}
+
 // Auto-Refresh Loop
 function resetAutoRefresh() {
   if (state.refreshTimer) {
@@ -1127,6 +1184,7 @@ function resetAutoRefresh() {
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initHermesChat();
+  initPWA();
   fetchAllData();
   resetAutoRefresh();
 });

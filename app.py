@@ -86,6 +86,8 @@ def set_security_headers(response):
         "img-src 'self' data:; "
         "connect-src 'self'; "
         "font-src 'self'; "
+        "worker-src 'self'; "
+        "manifest-src 'self'; "
         "object-src 'none'; "
         "base-uri 'self'; "
         "form-action 'self'; "
@@ -105,6 +107,18 @@ def set_security_headers(response):
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/manifest.json")
+@app.route("/manifest.webmanifest")
+def manifest():
+    return send_from_directory(app.static_folder, "manifest.json", mimetype="application/manifest+json")
+
+@app.route("/sw.js")
+def service_worker():
+    response = send_from_directory(app.static_folder, "sw.js", mimetype="application/javascript")
+    response.headers["Service-Worker-Allowed"] = "/"
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 @app.route("/favicon.ico")
 def favicon():
