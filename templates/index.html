@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HOMESERVER OPS - Mission Control</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="brand-group">
+        <img src="/static/icon-192.png" alt="Server Ops Logo" class="brand-logo" />
+        <div class="brand-text">
+          <div class="brand-title">
+            <span>HOMESERVER OPS</span>
+            <span class="pulse-indicator" title="System Live"></span>
+          </div>
+          <div class="brand-subtitle" id="header-host">Protected Node &bull; Linux Core</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Telemetry Pills in Header -->
+    <div class="header-pills">
+      <div class="telemetry-pill" id="pill-cpu" title="CPU Utilization">
+        <span class="pill-label">CPU</span>
+        <span class="pill-val" id="quick-cpu">--%</span>
+      </div>
+      <div class="telemetry-pill" id="pill-ram" title="RAM Usage">
+        <span class="pill-label">RAM</span>
+        <span class="pill-val" id="quick-ram">--%</span>
+      </div>
+      <div class="telemetry-pill" id="pill-storage" title="NVMe Root Storage">
+        <span class="pill-label">NVMe /</span>
+        <span class="pill-val" id="quick-nvme">--%</span>
+      </div>
+      <div class="telemetry-pill" id="pill-temp" title="Storage / CPU Max Temp">
+        <span class="pill-label">TEMP</span>
+        <span class="pill-val" id="quick-temp">--°C</span>
+      </div>
+      <div class="telemetry-pill" id="pill-docker" title="Docker Containers Running">
+        <span class="pill-label">DOCKER</span>
+        <span class="pill-val" id="quick-docker">--/--</span>
+      </div>
+      <div class="telemetry-pill" id="pill-hermes" title="Hermes Services">
+        <span class="pill-label">HERMES</span>
+        <span class="pill-val" id="quick-hermes">CHECKING</span>
+      </div>
+    </div>
+
+    <!-- Controls: Auto-refresh & Manual trigger -->
+    <div class="header-actions">
+      <div class="refresh-selector">
+        <label for="refresh-interval" class="sr-only">Auto Refresh</label>
+        <select id="refresh-interval" title="Polling Interval">
+          <option value="2000">Every 2s</option>
+          <option value="5000" selected>Every 5s</option>
+          <option value="10000">Every 10s</option>
+          <option value="30000">Every 30s</option>
+          <option value="0">Paused</option>
+        </select>
+      </div>
+      <button id="btn-refresh" class="btn btn-primary" title="Refresh Now">
+        <span id="refresh-icon">&#x21bb;</span> Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tab Bar -->
+  <nav class="nav-tabs" role="tablist">
+    <button class="nav-tab active" data-tab="overview" role="tab">Overview</button>
+    <button class="nav-tab" data-tab="docker" role="tab">
+      Docker Containers <span class="tab-badge" id="badge-docker-count">0</span>
+    </button>
+    <button class="nav-tab" data-tab="hermes" role="tab">Hermes &amp; Services</button>
+    <button class="nav-tab" data-tab="storage" role="tab">Storage &amp; Temps</button>
+    <button class="nav-tab" data-tab="errors" role="tab">
+      Errors &amp; Alerts <span class="tab-badge alert-badge" id="badge-errors-count">0</span>
+    </button>
+    <button class="nav-tab" data-tab="logs" role="tab">Live Logs</button>
+    <button class="nav-tab" data-tab="hermes-console" role="tab">
+      Hermes AI Console <span class="badge badge-success" style="font-size: 0.65rem; padding: 2px 6px; margin-left: 4px;">AI LIVE</span>
+    </button>
+    <button class="nav-tab" data-tab="updates" role="tab">Update Log</button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- 1. OVERVIEW TAB -->
+    <section id="tab-overview" class="tab-pane active">
+      <!-- Top 4 Primary KPI Cards -->
+      <div class="grid grid-4">
+        <!-- CPU Card -->
+        <div class="card stat-card">
+          <div class="card-header">
+            <span class="card-title">CPU UTILIZATION</span>
+            <span class="badge" id="card-cpu-load">Load: --</span>
+          </div>
+          <div class="stat-value" id="card-cpu-pct">--<span class="stat-unit">%</span></div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="bar-cpu-pct" style="width: 0%;"></div>
+          </div>
+          <div class="stat-subtext" id="card-cpu-model">Intel(R) Core(TM) i5-8500T @ 2.10GHz &bull; 6 Cores</div>
+        </div>
+
+        <!-- RAM Card -->
+        <div class="card stat-card">
+          <div class="card-header">
+            <span class="card-title">MEMORY (RAM)</span>
+            <span class="badge" id="card-swap-badge">Swap: --%</span>
+          </div>
+          <div class="stat-value" id="card-ram-pct">--<span class="stat-unit">%</span></div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="bar-ram-pct" style="width: 0%;"></div>
+          </div>
+          <div class="stat-subtext" id="card-ram-details">-- / -- GiB used &bull; -- GiB free</div>
+        </div>
+
+        <!-- Storage Card -->
+        <div class="card stat-card">
+          <div class="card-header">
+            <span class="card-title">STORAGE DRIVES</span>
+            <span class="badge" id="card-temp-badge">Max: --°C</span>
+          </div>
+          <div class="stat-value" id="card-storage-primary">--<span class="stat-unit">%</span></div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="bar-storage-primary" style="width: 0%;"></div>
+          </div>
+          <div class="stat-subtext" id="card-storage-details">/ (NVMe): -- GB &bull; /mnt/hdd: -- GB</div>
+        </div>
+
+        <!-- Docker / Health Card -->
+        <div class="card stat-card">
+          <div class="card-header">
+            <span class="card-title">DOCKER &amp; HERMES</span>
+            <span class="badge badge-success" id="card-hermes-status">ACTIVE</span>
+          </div>
+          <div class="stat-value" id="card-docker-running">--<span class="stat-unit"> RUNNING</span></div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill progress-success" id="bar-docker-healthy" style="width: 100%;"></div>
+          </div>
+          <div class="stat-subtext" id="card-uptime-text">Uptime: -- &bull; Server Normal</div>
+        </div>
+      </div>
+
+      <!-- Mid Section: CPU Cores breakdown & RAM Distribution -->
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">CPU PER-CORE ACTIVITY (6 CORES)</span>
+            <span class="card-sub" id="cpu-load-detail">1m: - | 5m: - | 15m: -</span>
+          </div>
+          <div class="cores-container" id="cores-grid">
+            <!-- Dynamically populated core bars -->
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">MEMORY CONSUMPTION MATRIX</span>
+            <span class="card-sub" id="ram-available-detail">Available: --</span>
+          </div>
+          <div class="memory-breakdown" id="memory-matrix">
+            <div class="matrix-row">
+              <span class="matrix-label">Physical RAM Used</span>
+              <span class="matrix-val" id="mem-used-val">--</span>
+            </div>
+            <div class="matrix-row">
+              <span class="matrix-label">Buffers &amp; Page Cache</span>
+              <span class="matrix-val" id="mem-cache-val">--</span>
+            </div>
+            <div class="matrix-row">
+              <span class="matrix-label">Free Unallocated RAM</span>
+              <span class="matrix-val" id="mem-free-val">--</span>
+            </div>
+            <div class="matrix-row">
+              <span class="matrix-label">Swap File Allocation</span>
+              <span class="matrix-val" id="mem-swap-val">--</span>
+            </div>
+            <div class="matrix-row">
+              <span class="matrix-label">Shared Memory</span>
+              <span class="matrix-val" id="mem-shared-val">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Overview Grid: Hermes Suite Quick Status & System Errors snippet -->
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">HERMES STACK SNAPSHOT</span>
+            <button class="btn btn-secondary btn-sm" onclick="switchTab('hermes')">Details &rarr;</button>
+          </div>
+          <div class="quick-list" id="overview-hermes-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">RECENT CRITICAL LOGS / ERRORS</span>
+            <button class="btn btn-secondary btn-sm" onclick="switchTab('errors')">View All &rarr;</button>
+          </div>
+          <div class="quick-list" id="overview-errors-list">
+            <!-- Dynamically populated errors -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. DOCKER CONTAINERS TAB -->
+    <section id="tab-docker" class="tab-pane">
+      <div class="tab-toolbar">
+        <div class="search-wrap">
+          <input type="text" id="docker-search" class="input-search" placeholder="Filter containers by name, status, or image..." />
+        </div>
+        <div class="toolbar-stats" id="docker-summary-stats">
+          <span>Loading container metrics...</span>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table class="data-table" id="docker-table">
+            <thead>
+              <tr>
+                <th>Container</th>
+                <th>Status</th>
+                <th>Memory Usage &amp; Limit</th>
+                <th>Memory %</th>
+                <th>CPU %</th>
+                <th>Network I/O</th>
+                <th>Block I/O</th>
+                <th>Ports</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="docker-tbody">
+              <tr>
+                <td colspan="9" class="text-center text-muted">Collecting Docker stats...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. HERMES & SERVICES TAB -->
+    <section id="tab-hermes" class="tab-pane">
+      <!-- Hermes Agent Ecosystem Section -->
+      <div class="section-title-wrap">
+        <h2 class="section-title">HERMES AGENT &amp; BOT ECOSYSTEM</h2>
+        <span class="section-desc">Unified status of Hermes Agent CLI, Gateway, Dashboards, and Discord Bots</span>
+      </div>
+
+      <div class="grid grid-3" id="hermes-cards-grid">
+        <!-- Populated via JS -->
+      </div>
+
+      <!-- Hermes Active Processes Table -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <span class="card-title">RUNNING HERMES PROCESSES &amp; CLI SESSIONS</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>Process Name</th>
+                <th>Memory (RSS)</th>
+                <th>CPU %</th>
+                <th>Command Line</th>
+              </tr>
+            </thead>
+            <tbody id="hermes-procs-tbody">
+              <tr><td colspan="5" class="text-muted text-center">Scanning processes...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- System Daemons & PM2 Section -->
+      <div class="section-title-wrap mt-6">
+        <h2 class="section-title">CORE SERVICES &amp; PM2 MANAGER</h2>
+        <span class="section-desc">Infrastructure daemons, database engines, web servers, and PM2 node instances</span>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">PM2 APPLICATIONS</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>App Name</th>
+                  <th>PID</th>
+                  <th>Status</th>
+                  <th>Memory</th>
+                  <th>CPU</th>
+                  <th>Restarts</th>
+                </tr>
+              </thead>
+              <tbody id="pm2-tbody">
+                <tr><td colspan="6" class="text-muted text-center">Loading PM2 instances...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">SYSTEMD CORE SERVICES</span>
+          </div>
+          <div class="table-responsive max-h-350">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Status</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody id="systemd-tbody">
+                <tr><td colspan="3" class="text-muted text-center">Checking services...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Listening Ports Matrix -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <span class="card-title">ACTIVE NETWORK SERVICES &amp; PROTOCOLS</span>
+          <input type="text" id="ports-filter" class="input-search input-search-sm" placeholder="Search service or protocol..." />
+        </div>
+        <div class="table-responsive max-h-400">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Service / Component</th>
+                <th>Protocol</th>
+                <th>Access Scope</th>
+                <th>Security &amp; Status</th>
+              </tr>
+            </thead>
+            <tbody id="ports-tbody">
+              <tr><td colspan="4" class="text-muted text-center">Scanning active network services...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. STORAGE & TEMPERATURES TAB -->
+    <section id="tab-storage" class="tab-pane">
+      <div class="section-title-wrap">
+        <h2 class="section-title">STORAGE CAPACITIES &amp; HARDWARE THERMALS</h2>
+        <span class="section-desc">Live partition utilization, NVMe SSD thermals, HDD smart status, and CPU core sensors</span>
+      </div>
+
+      <div class="grid grid-3" id="disks-grid">
+        <!-- Populated via JS -->
+      </div>
+
+      <div class="section-title-wrap mt-6">
+        <h2 class="section-title">HARDWARE SENSORS &amp; THERMAL ZONES</h2>
+        <span class="section-desc">Raw temperature readouts from /sys/class/hwmon and SMART diagnostics</span>
+      </div>
+
+      <div class="grid grid-4" id="temps-grid">
+        <!-- Populated via JS -->
+      </div>
+
+      <!-- Top Memory and CPU Processes -->
+      <div class="section-title-wrap mt-6">
+        <h2 class="section-title">SYSTEM PROCESS CONSUMPTION LEADERS</h2>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">TOP PROCESSES BY RAM</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>PID</th>
+                  <th>Name</th>
+                  <th>User</th>
+                  <th>Memory</th>
+                  <th>RAM %</th>
+                </tr>
+              </thead>
+              <tbody id="top-ram-tbody">
+                <tr><td colspan="5" class="text-muted text-center">Scanning process table...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">TOP PROCESSES BY CPU</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>PID</th>
+                  <th>Name</th>
+                  <th>User</th>
+                  <th>CPU %</th>
+                  <th>Memory</th>
+                </tr>
+              </thead>
+              <tbody id="top-cpu-tbody">
+                <tr><td colspan="5" class="text-muted text-center">Scanning process table...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ERRORS & INCIDENTS TAB -->
+    <section id="tab-errors" class="tab-pane">
+      <div class="section-title-wrap">
+        <h2 class="section-title">INCIDENT LOG &amp; SYSTEM ERRORS</h2>
+        <span class="section-desc">Kernel OOM kills, systemd failed units, and priority 0-3 error entries from journalctl</span>
+      </div>
+
+      <!-- OOM Alerts Callout -->
+      <div class="oom-container" id="oom-container">
+        <!-- Populated if OOM events found -->
+      </div>
+
+      <!-- Error Filter Toolbar -->
+      <div class="tab-toolbar">
+        <div class="search-wrap">
+          <input type="text" id="errors-search" class="input-search" placeholder="Search error messages, units, or codes..." />
+        </div>
+        <div class="toolbar-stats" id="errors-summary-stats">
+          <span>Filtering recent errors...</span>
+        </div>
+      </div>
+
+      <!-- Structured Errors Table -->
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 170px;">Timestamp</th>
+                <th style="width: 110px;">Severity</th>
+                <th style="width: 220px;">Unit / Source</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody id="errors-tbody">
+              <tr><td colspan="4" class="text-muted text-center">Inspecting system logs for errors...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. LIVE LOGS TAB -->
+    <section id="tab-logs" class="tab-pane">
+      <div class="log-controls-bar">
+        <div class="log-selector-group">
+          <label for="log-source" class="control-label">Source:</label>
+          <select id="log-source" class="select-input">
+            <option value="system">System Journal (journalctl)</option>
+            <optgroup label="Systemd Units">
+              <option value="unit:docker.service">docker.service</option>
+              <option value="unit:hermesbot.service">hermesbot.service</option>
+              <option value="unit:hermesbot-web.service">hermesbot-web.service</option>
+              <option value="unit:hermesbot-adventure.service">hermesbot-adventure.service</option>
+              <option value="unit:nginx.service">nginx.service</option>
+              <option value="unit:mysqld.service">mysqld.service</option>
+              <option value="unit:tailscaled.service">tailscaled.service</option>
+              <option value="unit:smartmontools.service">smartmontools.service</option>
+            </optgroup>
+            <optgroup label="Docker Containers" id="log-docker-options">
+              <!-- Dynamically populated container options -->
+            </optgroup>
+          </select>
+
+          <label for="log-lines" class="control-label">Lines:</label>
+          <select id="log-lines" class="select-input">
+            <option value="50">50</option>
+            <option value="100" selected>100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+          </select>
+        </div>
+
+        <div class="log-actions">
+          <label class="checkbox-label">
+            <input type="checkbox" id="log-autoscroll" checked /> Auto-scroll
+          </label>
+          <button class="btn btn-secondary btn-sm" id="btn-copy-logs">Copy Logs</button>
+          <button class="btn btn-primary btn-sm" id="btn-fetch-logs">Fetch Logs</button>
+        </div>
+      </div>
+
+      <div class="log-viewer-container">
+        <pre class="log-terminal" id="log-terminal">Select a source and click "Fetch Logs" to stream output...</pre>
+      </div>
+    </section>
+
+    <!-- 7. HERMES INTERACTIVE AI CONSOLE TAB -->
+    <section id="tab-hermes-console" class="tab-pane">
+      <div class="section-title-wrap">
+        <h2 class="section-title">HERMES AI COMPANION</h2>
+        <span class="section-desc">Guest-friendly AI chat &bull; Sandboxed &amp; secure with zero VPS shell execution</span>
+      </div>
+
+      <div class="card hermes-chat-card">
+        <div class="card-header hermes-console-header">
+          <div class="hermes-header-left">
+            <img src="/static/logo.png" alt="Hermes Logo" class="hermes-avatar-header" onerror="this.style.display='none'">
+            <div>
+              <div class="hermes-title">Hermes AI Assistant</div>
+              <div class="hermes-subtitle">Secure Guest Chat &bull; Read-Only Sandboxed Environment</div>
+            </div>
+          </div>
+          <div class="hermes-header-right">
+            <span class="badge badge-success" id="hermes-console-status">ONLINE</span>
+            <button class="btn btn-secondary btn-sm" id="btn-clear-chat" title="Clear Chat History">Clear History</button>
+            <span class="badge badge-neutral" style="font-size: 11px; padding: 4px 8px;">Hermes Interface</span>
+          </div>
+        </div>
+
+        <!-- System Context Ribbon -->
+        <div class="hermes-context-bar">
+          <span class="context-item"><strong>Host:</strong> Protected Node</span>
+          <span class="context-item"><strong>Mode:</strong> Guest Companion</span>
+          <span class="context-item"><strong>Security:</strong> <span style="color:#10b981;">No Shell / No VPS Access</span></span>
+          <span class="context-item"><strong>Sandbox:</strong> Enforced</span>
+        </div>
+
+        <!-- Chat Stream Body -->
+        <div class="hermes-chat-body" id="hermes-chat-stream">
+          <!-- Initial Welcome Message -->
+          <div class="chat-msg chat-msg-hermes">
+            <div class="chat-avatar">
+              <img src="/static/logo.png" alt="Hermes" onerror="this.src='/static/icon-192.png'">
+            </div>
+            <div class="chat-bubble">
+              <div class="chat-bubble-header">
+                <span class="chat-author">Hermes Agent</span>
+                <span class="chat-time" id="welcome-msg-time">Just now</span>
+              </div>
+              <div class="chat-text">
+                <p>Hello! I am <strong>Hermes</strong>, the AI companion for Ankit's server dashboard. Feel free to chat with me, ask questions about tech, coding, Linux, or what this server is running.</p>
+                <p style="font-size: 11.5px; color: #a1a1aa; border-left: 2px solid #333; padding-left: 8px; margin: 8px 0;">
+                  🔒 <em>Security Note: This web chat is strictly conversational and sandboxed. It cannot run terminal commands, modify the VPS, access private credentials, or perform hacking actions.</em>
+                </p>
+                <div class="chat-quick-actions">
+                  <div class="quick-action-label">Suggestions:</div>
+                  <button class="chip-action" data-prompt="Hello! What is this server for and what is running here?">👋 What is this server?</button>
+                  <button class="chip-action" data-prompt="How is the server load, CPU, and RAM doing right now?">⚡ Check Server Load</button>
+                  <button class="chip-action" data-prompt="Can you explain what Docker containers are in simple terms?">🐳 Explain Docker</button>
+                  <button class="chip-action" data-prompt="Tell me a cool Linux terminal tip or trick.">🐧 Linux Tip</button>
+                  <button class="chip-action" data-prompt="What security protections are active on this web chat?">🛡️ Chat Security Policy</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Typing / Processing Indicator -->
+        <div class="hermes-thinking-indicator" id="hermes-thinking" style="display: none;">
+          <div class="thinking-spinner"></div>
+          <span>Hermes is thinking and generating reply...</span>
+        </div>
+
+        <!-- Input Area -->
+        <div class="hermes-chat-footer">
+          <form id="hermes-chat-form" class="hermes-input-group">
+            <textarea id="hermes-input-box" class="hermes-textarea" placeholder="Chat with Hermes or ask a question... (Enter to send, Shift+Enter for newline)" rows="2"></textarea>
+            <button type="submit" id="hermes-send-btn" class="btn btn-primary hermes-send-button">
+              <span>Send</span> &rarr;
+            </button>
+          </form>
+          <div class="hermes-input-hints">
+            <span>Sandboxed Guest Mode &bull; No VPS Shell Access &bull; 70s Timeout &bull; Shift+Enter for new line</span>
+            <span id="hermes-char-count">0 / 2000</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. UPDATE LOG TAB -->
+    <section id="tab-updates" class="tab-pane">
+      <div class="section-title-wrap">
+        <h2 class="section-title">SYSTEM UPDATE &amp; CHANGELOG</h2>
+        <span class="section-desc">Release log and operational updates for Homeserver Ops</span>
+      </div>
+
+      <div class="card update-card" style="border-color: #555; margin-bottom: 24px;">
+        <div class="update-header">
+          <div class="update-version">v1.1.0 Interactive Hermes Web Console</div>
+          <div class="update-date">September 18, 2026</div>
+        </div>
+        <div class="update-body">
+          <p>Integrated native Hermes Agent AI Console into Homeserver Ops dashboard, enabling direct communication and system administration from any connected browser.</p>
+          <h4>New Features &amp; Capabilities:</h4>
+          <ul>
+            <li><strong>Direct Web Chat Interface:</strong> Talk to Hermes Agent via web interface with Markdown rendering, code snippet formatting, and quick copy tools.</li>
+            <li><strong>Automated Tool Execution:</strong> Prompts run directly with local server privileges, allowing real-time container checks, error analysis, and triage.</li>
+            <li><strong>Quick Action Chips:</strong> One-click triggers for Server Health, Error Analysis, Docker breakdown, Storage Thermals, and Port Registry.</li>
+            <li><strong>Unified Connectivity:</strong> Secure dashboard access across local network and encrypted mesh VPN.</li>
+          </ul>
+          <div class="update-signature">
+            <span>&mdash; By Hermes</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card update-card">
+        <div class="update-header">
+          <div class="update-version">v1.0.0 Production Release</div>
+          <div class="update-date">September 18, 2026</div>
+        </div>
+        <div class="update-body">
+          <p>Initial deployment of the comprehensive Server Control &amp; Observability Center for homeserver infrastructure.</p>
+          <h4>Monitored Subsystems &amp; Capabilities:</h4>
+          <ul>
+            <li><strong>Docker Containers:</strong> Live tracking of containers with real-time RAM usage, memory limits, CPU percentages, network I/O, block I/O, and per-container log inspection.</li>
+            <li><strong>Hermes Agent Suite:</strong> Deep monitoring of Hermes Agent Gateway, Hermes Web, HermesBot Discord, Adventure RPG bot, and active CLI sessions.</li>
+            <li><strong>Hardware Thermals &amp; Storage:</strong> Exact NVMe SSD temperature via hwmon sensors, SATA HDD temperature via SMART, CPU package and per-core thermals, PCH chipset, and partition capacity gauges.</li>
+            <li><strong>Incident Triage &amp; Errors:</strong> Automated extraction of system journal errors (priority 0-3), Kernel Out-Of-Memory (OOM) killer events, and failed systemd units.</li>
+            <li><strong>Network &amp; Services:</strong> Real-time network service registry, systemd service supervision, and PM2 process management.</li>
+            <li><strong>Design System:</strong> Pure black (#0a0a0a) operational aesthetic, high-contrast typography, zero external dependencies, responsive across mobile and desktop.</li>
+          </ul>
+          <div class="update-signature">
+            <span>&mdash; By Hermes</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Container Log Modal -->
+  <div class="modal-backdrop" id="container-log-modal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-container-name">Container Logs</div>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-toolbar">
+        <span class="text-muted" id="modal-container-lines">Showing last 100 lines</span>
+        <div>
+          <button class="btn btn-secondary btn-sm" id="modal-copy-btn">Copy</button>
+          <button class="btn btn-primary btn-sm" id="modal-refresh-btn">Refresh</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <pre class="log-terminal log-terminal-modal" id="modal-log-content">Loading logs...</pre>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-left">
+      <span>HOMESERVER OPS</span> &bull; <span>Host: Protected Node</span> &bull; <span>Status: Encrypted &amp; Secured</span>
+    </div>
+    <div class="footer-right">
+      <span id="footer-sync-time">Last synced: --:--:--</span>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+[Unit]
+Description=Homeserver Ops - High-Performance Server Observability Dashboard & AI Companion
+After=network.target docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Homeserver-OPS
+ExecStart=/usr/bin/python3 app.py
+Restart=always
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
+Environment=PORT=9090
+
+# Hardening measures
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=default.target
