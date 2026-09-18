@@ -209,9 +209,13 @@ function renderHeaderPills(overview, storage) {
 
   // Hermes
   const quickHermes = document.getElementById('quick-hermes');
+  const pillHermes = document.getElementById('pill-hermes');
   const hermesHealthy = overview.hermes?.healthy;
   quickHermes.textContent = hermesHealthy ? 'HEALTHY' : 'DEGRADED';
   quickHermes.style.color = hermesHealthy ? 'var(--accent-green)' : 'var(--accent-amber)';
+  if (pillHermes) {
+    pillHermes.style.borderColor = hermesHealthy ? 'rgba(34, 197, 94, 0.3)' : 'rgba(234, 179, 8, 0.4)';
+  }
 
   // Badges in Tabs
   document.getElementById('badge-docker-count').textContent = overview.docker_count;
